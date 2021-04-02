@@ -5,6 +5,10 @@ import debugFactory from 'debug';
 import { defaultRegistry, makeSuccessResponse } from '@automattic/composite-checkout';
 import type { PaymentProcessorResponse } from '@automattic/composite-checkout';
 import type { Stripe, StripeConfiguration } from '@automattic/calypso-stripe';
+import type {
+	TransactionRequest,
+	WPCOMTransactionEndpointResponse,
+} from '@automattic/wpcom-checkout';
 
 /**
  * Internal dependencies
@@ -18,10 +22,6 @@ import {
 } from './translate-cart';
 import type { PaymentProcessorOptions } from '../types/payment-processors';
 import type { ManagedContactDetails } from '../types/wpcom-store-state';
-import type {
-	TransactionRequest,
-	WPCOMTransactionEndpointResponse,
-} from '../types/transaction-endpoint';
 
 const { select } = defaultRegistry;
 const debug = debugFactory( 'calypso:composite-checkout:apple-pay-processor' );
