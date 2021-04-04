@@ -5,11 +5,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 import { useTranslate } from 'i18n-calypso';
+import { Field } from '@automattic/wpcom-checkout';
 
 /**
  * Internal dependencies
  */
-import Field from './field';
 import { LeftColumn, RightColumn } from './ie-fallback';
 import { isValid } from '../types/wpcom-store-state';
 import CountrySelectMenu from './country-select-menu';
