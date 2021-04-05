@@ -18,7 +18,7 @@ export default function () {
 	page( `/partner-portal/partner-key`, controller.partnerKeyContext, makeLayout, clientRender );
 
 	page(
-		`/partner-portal/:filter(unassigned|assigned|revoked)?`,
+		`/partner-portal/licenses/:filter(unassigned|assigned|revoked)?`,
 		controller.requirePartnerKeyContext,
 		controller.partnerPortalContext,
 		makeLayout,
@@ -33,5 +33,13 @@ export default function () {
 		clientRender
 	);
 
-	page( `/partner-portal/*`, '/partner-portal' );
+	page( `/partner-portal/licenses/*`, '/partner-portal/licenses' );
+
+	page(
+		`/partner-portal`,
+		controller.requirePartnerKeyContext,
+		controller.billingDashboardContext,
+		makeLayout,
+		clientRender
+	);
 }

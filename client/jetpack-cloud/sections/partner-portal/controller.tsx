@@ -22,6 +22,7 @@ import PartnerPortalSidebar from 'calypso/jetpack-cloud/sections/partner-portal/
 import SelectPartnerKey from 'calypso/jetpack-cloud/sections/partner-portal/select-partner-key';
 import Licenses from 'calypso/jetpack-cloud/sections/partner-portal/primary/licenses';
 import IssueLicense from 'calypso/jetpack-cloud/sections/partner-portal/primary/issue-license';
+import BillingDashboard from 'calypso/jetpack-cloud/sections/partner-portal/primary/billing-dashboard';
 import {
 	LicenseFilter,
 	LicenseSortDirection,
@@ -66,6 +67,14 @@ export function issueLicenseContext( context: PageJS.Context, next: () => void )
 	context.header = <Header />;
 	context.secondary = <PartnerPortalSidebar path={ context.path } />;
 	context.primary = <IssueLicense />;
+	context.footer = <JetpackComFooter />;
+	next();
+}
+
+export function billingDashboardContext( context: PageJS.Context, next: () => void ): void {
+	context.header = <Header />;
+	context.secondary = <PartnerPortalSidebar path={ context.path } />;
+	context.primary = <BillingDashboard />;
 	context.footer = <JetpackComFooter />;
 	next();
 }
