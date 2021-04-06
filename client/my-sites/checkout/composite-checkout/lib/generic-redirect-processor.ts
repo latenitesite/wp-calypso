@@ -11,6 +11,7 @@ import type { PaymentProcessorResponse } from '@automattic/composite-checkout';
 import type {
 	WPCOMTransactionEndpointResponse,
 	CheckoutPaymentMethodSlug,
+	ManagedContactDetails,
 } from '@automattic/wpcom-checkout';
 
 /**
@@ -22,7 +23,6 @@ import { recordTransactionBeginAnalytics } from './analytics';
 import submitWpcomTransaction from './submit-wpcom-transaction';
 import prepareRedirectTransaction from '../lib/prepare-redirect-transaction';
 import type { PaymentProcessorOptions } from '../types/payment-processors';
-import type { ManagedContactDetails } from '../types/wpcom-store-state';
 
 const { select } = defaultRegistry;
 

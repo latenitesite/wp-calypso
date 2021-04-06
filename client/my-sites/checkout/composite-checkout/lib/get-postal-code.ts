@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { defaultRegistry } from '@automattic/composite-checkout';
+import type { ManagedContactDetails } from '@automattic/wpcom-checkout';
 
 /**
  * Internal dependencies
  */
 import { tryToGuessPostalCodeFormat } from 'calypso/lib/postal-code';
-import type { ManagedContactDetails } from '../types/wpcom-store-state';
 
 const { select } = defaultRegistry;
 

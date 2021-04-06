@@ -3,12 +3,12 @@
  */
 import { defaultRegistry } from '@automattic/composite-checkout';
 import type { DomainContactDetails } from '@automattic/shopping-cart';
+import type { ManagedContactDetails } from '@automattic/wpcom-checkout';
 
 /**
  * Internal dependencies
  */
 import { prepareDomainContactDetailsForTransaction } from 'calypso/my-sites/checkout/composite-checkout/types/wpcom-store-state';
-import type { ManagedContactDetails } from '../types/wpcom-store-state';
 
 const { select } = defaultRegistry;
 

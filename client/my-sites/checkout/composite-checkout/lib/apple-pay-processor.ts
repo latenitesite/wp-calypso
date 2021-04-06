@@ -8,6 +8,7 @@ import type { Stripe, StripeConfiguration } from '@automattic/calypso-stripe';
 import type {
 	TransactionRequest,
 	WPCOMTransactionEndpointResponse,
+	ManagedContactDetails,
 } from '@automattic/wpcom-checkout';
 
 /**
@@ -21,7 +22,6 @@ import {
 	createTransactionEndpointCartFromResponseCart,
 } from './translate-cart';
 import type { PaymentProcessorOptions } from '../types/payment-processors';
-import type { ManagedContactDetails } from '../types/wpcom-store-state';
 
 const { select } = defaultRegistry;
 const debug = debugFactory( 'calypso:composite-checkout:apple-pay-processor' );
