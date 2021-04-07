@@ -568,10 +568,15 @@ export async function waitTillTextPresent( driver, selector, text, waitOverride 
 	);
 }
 
-export async function waitTillAbleToSwitchToFrame( driver, selector, text, waitOverride ) {
-	const timeoutWait = waitOverride ? waitOverride : explicitWaitMS;
-	const timeoutText = text
-		? text
-		: `Timed out wiating to be able to switch to IFrame with ${ selector.using } of ${ selector.value }`;
-	return driver.wait( until.ableToSwitchToFrame( selector ), timeoutWait, timeoutText );
+/**
+ * Waits until the input driver is able to switch to the designated frame.
+ * Upon successful resolution, the driver will be left focused on the new frame.
+ *
+ * @param {WebDriver} driver The parent WebDriver instance
+ * @param {By} locator The element's locator
+ * @param {number} [timeout=explicitWaitMS] The timeout in milliseconds
+ * @returns {Promise<boolean>} A promise that will resolve with true if the switch was succesfull
+ */
+export function waitUntilAbleToSwitchToFrame( driver, locator, timeout = explicitWaitMS ) {
+	return driver.wait( until.ableToSwitchToFrame( locator ), timeout );
 }
