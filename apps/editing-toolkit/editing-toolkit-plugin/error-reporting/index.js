@@ -9,6 +9,14 @@ import apiFetch from '@wordpress/api-fetch';
  */
 const headErrors = window._jsErr || [];
 const headErrorHandler = window._headJsErrorHandler;
+const isAtomic = window.a8cFseErrorReportingData.isAtomic || false;
+let endpointConfig;
+
+if ( isAtomic ) {
+	endpointConfig = { url: 'https://public.wordpress.com/rest/v1.1/js-error' };
+} else {
+	endpointConfig = { path: '/rest/v1.1/js-error' };
+}
 
 const reportError = ( { error } ) => {
 	// This is debug code and will be removed later.
@@ -28,12 +36,16 @@ const reportError = ( { error } ) => {
 	};
 
 	return (
-		apiFetch( {
-			global: true,
-			path: '/rest/v1.1/js-error',
-			method: 'POST',
-			data: { error: JSON.stringify( data ) },
-		} )
+		apiFetch(
+			Object.assign(
+				{
+					global: true,
+					method: 'POST',
+					data: { error: JSON.stringify( data ) },
+				},
+				endpointConfig
+			)
+		)
 			.then( () => console.log( 'Reported Error!', error.message ) )
 			// eslint-disable-next-line no-console
 			.catch( () => console.error( 'Error: Unable to record the error in Logstash.' ) )

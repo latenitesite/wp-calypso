@@ -118,6 +118,7 @@ afterEach( async function () {
 		this.currentTest.state === 'failed' &&
 		( config.get( 'closeBrowserOnComplete' ) === true || global.isHeadless === true )
 	) {
+		console.error( this.currentTest.err );
 		await driverManager.acceptAllAlerts( driver );
 	}
 } );

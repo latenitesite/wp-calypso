@@ -105,7 +105,7 @@ async function insertBlock( Block ) {
  */
 async function startNewPost( loginFlow ) {
 	await ReaderPage.Visit( driver );
-	await NavBarComponent.Expect( driver );
+	await NavBarComponent.Expect( drivera );
 
 	const navbarComponent = await NavBarComponent.Expect( driver );
 	await navbarComponent.clickCreateNewPost( { siteURL: loginFlow.account.loginURL } );
