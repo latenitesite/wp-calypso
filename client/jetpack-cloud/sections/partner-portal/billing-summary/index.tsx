@@ -11,6 +11,9 @@ import formatCurrency from '@automattic/format-currency';
 import { Button, Card } from '@automattic/components';
 import Tooltip from 'calypso/components/tooltip';
 import Gridicon from 'calypso/components/gridicon';
+import { useLocalizedMoment } from 'calypso/components/localized-moment';
+import useBillingDashboardQuery from 'calypso/state/partner-portal/licenses/hooks/use-billing-dashboard-query';
+import TextPlaceholder from 'calypso/jetpack-cloud/sections/partner-portal/text-placeholder';
 
 /**
  * Style dependencies
@@ -61,30 +64,53 @@ function CostTooltip(): ReactElement {
 
 export default function BillingSummary(): ReactElement {
 	const translate = useTranslate();
+	const billing = useBillingDashboardQuery();
+	const moment = useLocalizedMoment();
 
 	return (
 		<Card className="billing-summary">
 			<div className="billing-summary__stat billing-summary__total-licenses">
 				<span className="billing-summary__label">{ translate( 'Total licenses' ) }</span>
-				<strong className="billing-summary__value">{ numberFormat( 1348, 0 ) }</strong>
+				<strong className="billing-summary__value">
+					{ billing.isSuccess && numberFormat( billing.data.licenses.total, 0 ) }
+
+					{ ! billing.isSuccess && <TextPlaceholder /> }
+				</strong>
 			</div>
 
 			<div className="billing-summary__stat billing-summary__assigned-licenses">
 				<span className="billing-summary__label">{ translate( 'Assigned licenses' ) }</span>
-				<strong className="billing-summary__value">{ numberFormat( 1324, 0 ) }</strong>
+				<strong className="billing-summary__value">
+					{ billing.isSuccess && numberFormat( billing.data.licenses.assigned, 0 ) }
+
+					{ ! billing.isSuccess && <TextPlaceholder /> }
+				</strong>
 			</div>
 
 			<div className="billing-summary__stat billing-summary__unassigned-licenses">
 				<span className="billing-summary__label">{ translate( 'Unassigned licenses' ) }</span>
-				<strong className="billing-summary__value">{ numberFormat( 24, 0 ) }</strong>
+				<strong className="billing-summary__value">
+					{ billing.isSuccess && numberFormat( billing.data.licenses.unassigned, 0 ) }
+
+					{ ! billing.isSuccess && <TextPlaceholder /> }
+				</strong>
 			</div>
 
 			<div className="billing-summary__stat billing-summary__cost">
 				<span className="billing-summary__label">
-					<CostTooltip />
-					{ translate( 'Cost for %(date)s', { args: { date: 'March, 2021' } } ) }
+					{ billing.isSuccess && <CostTooltip /> }
+					{ billing.isSuccess &&
+						translate( 'Cost for %(date)s', {
+							args: { date: moment( billing.data.date ).format( 'MMMM, YYYY' ) },
+						} ) }
+
+					{ ! billing.isSuccess && <br /> }
 				</span>
-				<strong className="billing-summary__value">{ formatCurrency( 177916, 'USD' ) }</strong>
+				<strong className="billing-summary__value">
+					{ billing.isSuccess && formatCurrency( billing.data.costs.total, 'USD' ) }
+
+					{ ! billing.isSuccess && <TextPlaceholder /> }
+				</strong>
 			</div>
 		</Card>
 	);

@@ -122,4 +122,10 @@
 			padding: 0;
 		}
 	}
+
+	&__placeholder {
+		@include placeholder( --color-neutral-10 );
+
+		display: block;
+	}
 }

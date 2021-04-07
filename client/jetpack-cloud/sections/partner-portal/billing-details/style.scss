@@ -89,4 +89,10 @@
 			}
 		}
 	}
+
+	&__placeholder {
+		@include placeholder( --color-neutral-10 );
+
+		display: block;
+	}
 }
