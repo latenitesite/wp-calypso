@@ -160,7 +160,6 @@ class CalypsoifyIframe extends Component<
 	mediaCancelPort: MessagePort | null = null;
 	revisionsPort: MessagePort | null = null;
 	checkoutPort: MessagePort | null = null;
-	successfulIframeLoad = false;
 	waitForIframeToInit: ReturnType< typeof setInterval > | undefined = undefined;
 	waitForIframeToLoad: ReturnType< typeof setTimeout > | undefined = undefined;
 
@@ -171,6 +170,7 @@ class CalypsoifyIframe extends Component<
 		// If the iframe fails to load for some reson, eg. an unexpected auth loop, this timeout
 		// provides a redirect to wpadmin for web users - this should now be a rare occurance with
 		// a 3rd party cookie auth issue fix in place https://github.com/Automattic/jetpack/pull/16167
+		// The waitForIframeToLoad timeout is cleared once we receive the WindowActions.Loaded message.
 		this.waitForIframeToInit = setInterval( () => {
 			if ( this.props.shouldLoadIframe ) {
 				clearInterval( ( this.waitForIframeToInit as unknown ) as number );
@@ -218,7 +218,8 @@ class CalypsoifyIframe extends Component<
 			this.iframeRef.current &&
 			this.iframeRef.current.contentWindow
 		) {
-			this.successfulIframeLoad = true;
+			this.waitForIframeToLoad && clearTimeout( this.waitForIframeToLoad );
+
 			const { port1: iframePortObject, port2: transferredPortObject } = new window.MessageChannel();
 
 			this.iframePort = iframePortObject;
@@ -234,6 +235,9 @@ class CalypsoifyIframe extends Component<
 
 			// Notify external listeners that the iframe has loaded
 			this.props.setEditorIframeLoaded( true, this.iframePort );
+
+			window.performance?.mark( 'iframe_loaded' );
+			this.setState( { isIframeLoaded: true, currentIFrameUrl: this.props.iframeUrl } );
 
 			return;
 		}
@@ -660,16 +664,6 @@ class CalypsoifyIframe extends Component<
 			: `Block Editor > ${ postTypeText } > New`;
 	};
 
-	onIframeLoaded = ( iframeUrl: string ) => {
-		clearTimeout( this.waitForIframeToLoad );
-		if ( ! this.successfulIframeLoad ) {
-			window.location.replace( iframeUrl );
-			return;
-		}
-		window.performance?.mark( 'iframe_loaded' );
-		this.setState( { isIframeLoaded: true, currentIFrameUrl: iframeUrl } );
-	};
-
 	handleCheckoutSuccess = () => {
 		if ( this.checkoutPort ) {
 			this.checkoutPort.postMessage( 'checkout complete' );
@@ -723,11 +717,6 @@ class CalypsoifyIframe extends Component<
 							className={ isIframeLoaded ? 'is-loaded' : '' }
 							ref={ this.iframeRef }
 							src={ isIframeLoaded ? currentIFrameUrl : iframeUrl }
-							// Iframe url needs to be kept in state to prevent editor reloading if frame_nonce changes
-							// in Jetpack sites
-							onLoad={ () => {
-								this.onIframeLoaded( iframeUrl );
-							} }
 						/>
 					) }
 				</div>
