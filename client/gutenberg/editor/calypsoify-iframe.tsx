@@ -236,7 +236,6 @@ class CalypsoifyIframe extends Component<
 			this.iframeRef.current.contentWindow
 		) {
 			// Remove any timeouts waiting for the editor to load.
-			this.didEditorLoad = true;
 			this.waitForEditorLoad && clearTimeout( this.waitForEditorLoad );
 
 			const { port1: iframePortObject, port2: transferredPortObject } = new window.MessageChannel();
@@ -740,7 +739,7 @@ class CalypsoifyIframe extends Component<
 							// this handler. It really only tracks if the document
 							// has loaded. Use the WindowActions.Loaded onMessage
 							// handler to detect when the editor has loaded.
-							onLoad={ () => this.setEditorLoadTimer( 500 ) }
+							onLoad={ () => this.setEditorLoadTimer( 1000 ) }
 						/>
 					) }
 				</div>
