@@ -164,15 +164,14 @@ class CalypsoifyIframe extends Component<
 	componentDidMount() {
 		window.addEventListener( 'message', this.onMessage, false );
 
-		// If the iframe itself fails to load for some reson, eg. an unexpected
-		// auth loop, this timeout
-		// provides a redirect to wpadmin for web users - this should now be a rare occurance with
-		// a 3rd party cookie auth issue fix in place https://github.com/Automattic/jetpack/pull/16167
-		// The waitForIframeToLoad timeout is cleared once we receive the WindowActions.Loaded message.
+		// If the iframe itself fails to load for some reason, eg. an unexpected
+		// auth loop, we need to exit to wp-admin without the iFrame. Therefore,
+		// once we start loading the iFrame, we set the editor redirect timer to
+		// 25s. This timer is cleared when iFrame.onLoad is called.
 		const waitForIframeToInit = setInterval( () => {
 			if ( this.props.shouldLoadIframe ) {
 				clearInterval( waitForIframeToInit );
-				this.setEditorLoadTimer( 25000 );
+				this.setEditorRedirectTimer( 25000 );
 			}
 		}, 100 );
 
@@ -190,20 +189,24 @@ class CalypsoifyIframe extends Component<
 	}
 
 	/**
-	 * The editor load timer will attempt to perform a redirect if the editor has
-	 * not loaded after a certain time. There are currently two stages to the timer.
-	 * The first stage waits up to 25 seconds for the iframe to call `onLoad`. We
-	 * then wait a further 500ms for the iframe-bridge-server to respond that the
-	 * editor itself is ready to go. We really only consider Gutenframe to be
-	 * ready after the iframe-bridge-server has responded.
+	 * The editor redirect timer will attempt to perform a redirect if the editor
+	 * has not loaded after a certain time. There are currently two stages to the.
+	 * timer The first stage waits up to 25 seconds for the iframe to call `onLoad`.
+	 * We then wait a further 1s for the iframe-bridge-server to respond that the
+	 * editor itself is ready to go. We only consider Gutenframe to be ready after
+	 * the iframe-bridge-server has responded.
 	 */
-	waitForEditorLoad: ReturnType< typeof setTimeout > | undefined;
-	setEditorLoadTimer = ( time: number ) => {
-		this.waitForEditorLoad && clearTimeout( this.waitForEditorLoad );
-		this.waitForEditorLoad = setTimeout( this.tryRedirect, time );
+	editorRedirectTimer: ReturnType< typeof setTimeout > | undefined;
+	setEditorRedirectTimer = ( time: number ) => {
+		this.editorRedirectTimer && clearTimeout( this.editorRedirectTimer );
+		this.editorRedirectTimer = setTimeout( this.tryRedirect, time );
 	};
 
+	didEditorLoad = false;
 	tryRedirect = () => {
+		if ( this.didEditorLoad ) {
+			return;
+		}
 		const { notifyDesktopCannotOpenEditor, site, iframeUrl } = this.props;
 		if ( config.isEnabled( 'desktop' ) ) {
 			notifyDesktopCannotOpenEditor(
@@ -236,7 +239,8 @@ class CalypsoifyIframe extends Component<
 			this.iframeRef.current.contentWindow
 		) {
 			// Remove any timeouts waiting for the editor to load.
-			this.waitForEditorLoad && clearTimeout( this.waitForEditorLoad );
+			this.didEditorLoad = true;
+			this.editorRedirectTimer && clearTimeout( this.editorRedirectTimer );
 
 			const { port1: iframePortObject, port2: transferredPortObject } = new window.MessageChannel();
 
@@ -739,7 +743,7 @@ class CalypsoifyIframe extends Component<
 							// this handler. It really only tracks if the document
 							// has loaded. Use the WindowActions.Loaded onMessage
 							// handler to detect when the editor has loaded.
-							onLoad={ () => this.setEditorLoadTimer( 1000 ) }
+							onLoad={ () => this.setEditorRedirectTimer( 1000 ) }
 						/>
 					) }
 				</div>
