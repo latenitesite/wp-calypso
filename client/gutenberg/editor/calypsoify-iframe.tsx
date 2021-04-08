@@ -198,12 +198,12 @@ class CalypsoifyIframe extends Component<
 	 * ready after the iframe-bridge-server has responded.
 	 */
 	waitForEditorLoad: ReturnType< typeof setTimeout > | undefined;
-	setEditorLoadTimer( time: number ) {
+	setEditorLoadTimer = ( time: number ) => {
 		this.waitForEditorLoad && clearTimeout( this.waitForEditorLoad );
 		this.waitForEditorLoad = setTimeout( this.tryRedirect, time );
-	}
+	};
 
-	tryRedirect() {
+	tryRedirect = () => {
 		const { notifyDesktopCannotOpenEditor, site, iframeUrl } = this.props;
 		if ( config.isEnabled( 'desktop' ) ) {
 			notifyDesktopCannotOpenEditor(
@@ -214,7 +214,7 @@ class CalypsoifyIframe extends Component<
 			return;
 		}
 		window.location.replace( iframeUrl );
-	}
+	};
 
 	onMessage = ( { data, origin }: MessageEvent ) => {
 		if ( ! data || 'gutenbergIframeMessage' !== data.type ) {
