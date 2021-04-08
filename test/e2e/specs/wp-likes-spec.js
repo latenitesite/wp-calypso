@@ -119,20 +119,20 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 			await driverHelper.waitTillPresentAndDisplayed( driver, commentLikedText );
 		} );
 
-		// step( 'Unlike comment', async function () {
-		// 	await driver.switchTo().defaultContent();
+		step( 'Unlike comment', async function () {
+			await driver.switchTo().defaultContent();
 
-		// 	const commentUnLikeLink = By.xpath(
-		// 		`//div[@class='comment-content']/p[.='${ comment }']/../p[@class='comment-liked']/a[@class='comment-like-link']`
-		// 	);
-		// 	await driverHelper.scrollIntoView( driver, commentUnLikeLink, 'end' );
-		// 	await driverHelper.clickWhenClickable( driver, commentUnLikeLink );
+			const commentUnLikeLink = By.xpath(
+				`//div[@class='comment-content']/p[.='${ comment }']/../p[@class='comment-likes comment-liked']/a[@class='comment-like-link']`
+			);
+			await driverHelper.scrollIntoView( driver, commentUnLikeLink, 'end' );
+			await driverHelper.clickWhenClickable( driver, commentUnLikeLink );
 
-		// 	const commentUnLikedText = By.xpath(
-		// 		`//div[@class='comment-content']/p[.='${ comment }']/../p/span[starts-with(text(),'Like')]`
-		// 	);
-		// 	await driverHelper.waitTillPresentAndDisplayed( driver, commentUnLikedText );
-		// } );
+			const commentUnLikedText = By.xpath(
+				`//div[@class='comment-content']/p[.='${ comment }']/../p/span[starts-with(text(),'Like')]`
+			);
+			await driverHelper.waitTillPresentAndDisplayed( driver, commentUnLikedText );
+		} );
 
 		step( 'Like post as logged out user', async function () {
 			// todo: this isn't working like I expect
