@@ -11,6 +11,7 @@ import * as driverManager from '../lib/driver-manager';
 import * as dataHelper from '../lib/data-helper';
 import * as driverHelper from '../lib/driver-helper';
 import LoginFlow from '../lib/flows/login-flow';
+import LoginPage from '../lib/pages/login-page.js';
 import PostAreaComponent from '../lib/pages/frontend/post-area-component';
 import CommentsAreaComponent from '../lib/pages/frontend/comments-area-component';
 import GutenbergEditorComponent from '../lib/gutenberg/gutenberg-editor-component';
@@ -29,6 +30,7 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 	let postUrl;
 	this.timeout( mochaTimeoutMS );
 	const comment = dataHelper.randomPhrase();
+	let accountKey = 'gutenbergSimpleSiteUser'; // eslint-disable-line prefer-const
 
 	before( 'Start browser', async function () {
 		this.timeout( startBrowserTimeoutMS );
@@ -37,7 +39,7 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 
 	describe( 'Like posts and comments @parallel', function () {
 		step( 'Login, create a new post and view it', async function () {
-			const loginFlow = new LoginFlow( driver, 'gutenbergSimpleSiteUser' );
+			const loginFlow = new LoginFlow( driver, accountKey );
 			await loginFlow.loginAndStartNewPost( null, true );
 
 			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
@@ -47,7 +49,8 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		} );
 
 		// step( 'tofix: remove me', async function () {
-		// 	const loginFlow = new LoginFlow( driver, 'louisTestUser' );
+		// 	accountKey = 'louisTestUser';
+		// 	const loginFlow = new LoginFlow( driver, accountKey );
 		// 	await loginFlow.login();
 
 		// 	const iFrame = By.css( 'iframe.post-likes-widget' );
@@ -135,24 +138,46 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		} );
 
 		step( 'Like post as logged out user', async function () {
-			// todo: this isn't working like I expect
-			await driverManager.ensureNotLoggedIn( driver ); // Clear wpcom and calypso cookies
-			await driverManager.clearCookiesAndDeleteLocalStorage( driver, postUrl ); // Clear test post site cookies
+			await driverManager.ensureNotLoggedIn( driver ); // Clear wpcom/calypso cookies
+			await driverManager.clearCookiesAndDeleteLocalStorage( driver, postUrl ); // Clear test site cookies
+			const remoteLoginUrl = 'https://r-login.wordpress.com/';
+			await driverManager.clearCookiesAndDeleteLocalStorage( driver, remoteLoginUrl );
 
 			const iFrame = By.css( 'iframe.post-likes-widget' );
 			const postLikesArea = new AsyncBaseContainer( driver, iFrame, postUrl );
 			await postLikesArea._visitInit();
 
-			await driver.switchTo().defaultContent();
 			await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
 
 			const likeButton = By.css( '.like.sd-button' );
 			await driverHelper.scrollIntoView( driver, likeButton );
 			await driverHelper.clickWhenClickable( driver, likeButton );
 
+			// Switch to new window opened
+			const handles = await driver.getAllWindowHandles();
+			await driver.switchTo().window( handles[ 1 ] );
+
+			const account = dataHelper.getAccountConfig( accountKey );
+			if ( ! account ) {
+				throw new Error( `Account key '${ accountKey }' not found in the configuration` );
+			}
+			const loginPage = await LoginPage.Expect( driver );
+
+			try {
+				await loginPage.login( account[ 0 ], account[ 1 ] );
+			} catch ( e ) {
+				// Ignore NoSuchWindowError - this type of login redirects and closes the popup after login.
+				// todo: refactor login flow to detect this kind of login
+				// todo: check we don't spam slack with failed loggin notifications
+			}
+
+			// Switch back to post window
+			await driver.switchTo().window( handles[ 0 ] );
+
+			// Frame switch required for xpath lookup to work
+			await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
 			const postLikedText = By.xpath( `//span[@class='wpl-count-text'][.='You like this.']` );
 			await driverHelper.waitTillPresentAndDisplayed( driver, postLikedText );
-			await driver.switchTo().defaultContent();
 		} );
 	} );
 } );
