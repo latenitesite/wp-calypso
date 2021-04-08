@@ -202,9 +202,9 @@ class CalypsoifyIframe extends Component<
 		this.editorRedirectTimer = setTimeout( this.tryRedirect, time );
 	};
 
-	didEditorLoad = false;
+	disableRedirects = false;
 	tryRedirect = () => {
-		if ( this.didEditorLoad ) {
+		if ( this.disableRedirects ) {
 			return;
 		}
 		const { notifyDesktopCannotOpenEditor, site, iframeUrl } = this.props;
@@ -239,7 +239,7 @@ class CalypsoifyIframe extends Component<
 			this.iframeRef.current.contentWindow
 		) {
 			// Remove any timeouts waiting for the editor to load.
-			this.didEditorLoad = true;
+			this.disableRedirects = true;
 			this.editorRedirectTimer && clearTimeout( this.editorRedirectTimer );
 
 			const { port1: iframePortObject, port2: transferredPortObject } = new window.MessageChannel();
