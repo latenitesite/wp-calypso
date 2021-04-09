@@ -131,10 +131,7 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		} );
 
 		step( 'Like post as logged out user', async function () {
-			await driverManager.ensureNotLoggedIn( driver ); // Clear wpcom/calypso cookies
-			await driverManager.clearCookiesAndDeleteLocalStorage( driver, postUrl ); // Clear test site cookies
-			const remoteLoginUrl = 'https://r-login.wordpress.com/';
-			await driverManager.clearCookiesAndDeleteLocalStorage( driver, remoteLoginUrl );
+			await driverManager.ensureNotLoggedIntoSite( driver, postUrl );
 
 			const iFrame = By.css( 'iframe.post-likes-widget' );
 			const postLikesArea = new AsyncBaseContainer( driver, iFrame, postUrl );

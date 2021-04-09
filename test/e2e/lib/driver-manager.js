@@ -293,6 +293,14 @@ export async function ensureNotLoggedIn( driver ) {
 	return driver.sleep( 500 );
 }
 
+export async function ensureNotLoggedIntoSite( driver, siteUrl = false ) {
+	await ensureNotLoggedIn( driver ); // Clear wpcom/calypso cookies
+	await clearCookiesAndDeleteLocalStorage( driver, 'https://r-login.wordpress.com/' ); // Clear cookies on remote login
+	if ( siteUrl ) {
+		await clearCookiesAndDeleteLocalStorage( driver, siteUrl ); // Clear cookies on url
+	}
+}
+
 export async function dismissAllAlerts( driver ) {
 	await times( 3, async () => {
 		try {
