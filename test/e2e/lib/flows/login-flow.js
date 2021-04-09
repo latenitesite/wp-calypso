@@ -257,6 +257,25 @@ export default class LoginFlow {
 		);
 	}
 
+	async loginUsingPopup() {
+		// Switch to new window opened
+		const handles = await this.driver.getAllWindowHandles();
+
+		await this.driver.switchTo().window( handles[ 1 ] );
+
+		const loginPage = await LoginPage.Expect( this.driver );
+
+		await loginPage.login(
+			this.account.email || this.account.username,
+			this.account.password,
+			false,
+			{ retry: false }
+		);
+
+		// Switch back to post window
+		await this.driver.switchTo().window( handles[ 0 ] );
+	}
+
 	async loginAndOpenWooStore() {
 		await this.loginAndSelectMySite();
 		this.sideBarComponent = await SidebarComponent.Expect( this.driver );

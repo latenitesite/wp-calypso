@@ -11,7 +11,6 @@ import * as driverManager from '../lib/driver-manager';
 import * as dataHelper from '../lib/data-helper';
 import * as driverHelper from '../lib/driver-helper';
 import LoginFlow from '../lib/flows/login-flow';
-import LoginPopup from '../lib/pages/login-popup-page.js';
 import PostAreaComponent from '../lib/pages/frontend/post-area-component';
 import CommentsAreaComponent from '../lib/pages/frontend/comments-area-component';
 import GutenbergEditorComponent from '../lib/gutenberg/gutenberg-editor-component';
@@ -147,11 +146,8 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 			await driverHelper.scrollIntoView( driver, likeButton );
 			await driverHelper.clickWhenClickable( driver, likeButton );
 
-			const account = dataHelper.getAccountConfig( accountKey );
-			if ( ! account ) {
-				throw new Error( `Account key '${ accountKey }' not found in the configuration` );
-			}
-			await LoginPopup.Login( driver, account[ 0 ], account[ 1 ] );
+			const loginFlow = new LoginFlow( driver, accountKey );
+			await loginFlow.loginUsingPopup();
 
 			// Frame switch required for xpath lookup to work
 			await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
