@@ -43,32 +43,33 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		} );
 
 		step( 'Login, create a new post and view it', async function () {
-			const loginFlow = new LoginFlow( driver, accountKey );
-			await loginFlow.loginAndStartNewPost( null, true );
+			if ( process.env.NODE_CONFIG_ENV !== 'decrypted' ) {
+				const loginFlow = new LoginFlow( driver, accountKey );
+				await loginFlow.loginAndStartNewPost( null, true );
 
-			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
-			await gEditorComponent.enterTitle( blogPostTitle );
-			await gEditorComponent.enterText( blogPostQuote );
-			postUrl = await gEditorComponent.publish( { visit: true } );
+				const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
+				await gEditorComponent.enterTitle( blogPostTitle );
+				await gEditorComponent.enterText( blogPostQuote );
+				postUrl = await gEditorComponent.publish( { visit: true } );
+			} else {
+				// tofix: remove this section
+				accountKey = 'louisTestUser';
+				const loginFlow = new LoginFlow( driver, accountKey );
+				await loginFlow.login();
+
+				const iFrame = By.css( 'iframe.post-likes-widget' );
+				postUrl = 'https://c3polikes.blog/2021/04/07/awful-orcs-drink-hastily/';
+				const postLikesArea = new AsyncBaseContainer( driver, iFrame, postUrl );
+				await postLikesArea._visitInit();
+
+				await PostAreaComponent.Expect( driver );
+
+				// Unlike post if currently liked
+				await driver.switchTo().defaultContent();
+				await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
+				await driverHelper.clickIfPresent( driver, By.css( '.liked.sd-button' ) );
+			}
 		} );
-
-		// step( 'tofix: remove me', async function () {
-		// 	accountKey = 'louisTestUser';
-		// 	const loginFlow = new LoginFlow( driver, accountKey );
-		// 	await loginFlow.login();
-
-		// 	const iFrame = By.css( 'iframe.post-likes-widget' );
-		// 	postUrl = 'https://c3polikes.blog/2021/04/07/awful-orcs-drink-hastily/';
-		// 	const postLikesArea = new AsyncBaseContainer( driver, iFrame, postUrl );
-		// 	await postLikesArea._visitInit();
-
-		// 	await PostAreaComponent.Expect( driver );
-
-		// 	// Unlike post if currently liked
-		// 	await driver.switchTo().defaultContent();
-		// 	await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
-		// 	await driverHelper.clickIfPresent( driver, By.css( '.liked.sd-button' ) );
-		// } );
 
 		step( 'Like post', async function () {
 			await PostAreaComponent.Expect( driver );
