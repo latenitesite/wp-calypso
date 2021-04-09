@@ -80,7 +80,7 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		step( 'Post and like comment', async function () {
 			const commentArea = await CommentsAreaComponent.Expect( driver );
 
-			await commentArea._postComment( {
+			await commentArea.reply( {
 				comment: comment,
 				name: 'e2eTestName',
 				email: 'e2eTestName@test.com',
