@@ -293,6 +293,14 @@ export async function ensureNotLoggedIn( driver ) {
 	return driver.sleep( 500 );
 }
 
+/**
+ * Ensure a user isn't logged into wordpress.com, remote-login, or the given test site url.
+ *
+ * Clearing cookies on each site ensures a login step is required for popup based logins.
+ *
+ * @param driver Webdriver
+ * @param siteUrl to clear cookies from
+ */
 export async function ensureNotLoggedIntoSite( driver, siteUrl = false ) {
 	await ensureNotLoggedIn( driver ); // Clear wpcom/calypso cookies
 	await clearCookiesAndDeleteLocalStorage( driver, 'https://r-login.wordpress.com/' ); // Clear cookies on remote login
