@@ -11,7 +11,7 @@ import * as driverManager from '../lib/driver-manager';
 import * as dataHelper from '../lib/data-helper';
 import * as driverHelper from '../lib/driver-helper';
 import LoginFlow from '../lib/flows/login-flow';
-import LoginPage from '../lib/pages/login-page.js';
+import LoginPopup from '../lib/pages/login-popup-page.js';
 import PostAreaComponent from '../lib/pages/frontend/post-area-component';
 import CommentsAreaComponent from '../lib/pages/frontend/comments-area-component';
 import GutenbergEditorComponent from '../lib/gutenberg/gutenberg-editor-component';
@@ -38,6 +38,10 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 	} );
 
 	describe( 'Like posts and comments @parallel', function () {
+		beforeEach( 'Always start from the default frame', async function () {
+			await driver.switchTo().defaultContent();
+		} );
+
 		step( 'Login, create a new post and view it', async function () {
 			const loginFlow = new LoginFlow( driver, accountKey );
 			await loginFlow.loginAndStartNewPost( null, true );
@@ -67,9 +71,6 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		// } );
 
 		step( 'Like post', async function () {
-			// Ensure we start from the default frame
-			await driver.switchTo().defaultContent();
-
 			await PostAreaComponent.Expect( driver );
 
 			const likeButton = By.css( '.like.sd-button' );
@@ -83,8 +84,6 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		} );
 
 		step( 'Unlike post', async function () {
-			await driver.switchTo().defaultContent();
-
 			const iFrame = By.css( 'iframe.post-likes-widget' );
 			await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
 
@@ -99,9 +98,6 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		} );
 
 		step( 'Post and like comment', async function () {
-			// Ensure we start from the default frame
-			await driver.switchTo().defaultContent();
-
 			const commentArea = await CommentsAreaComponent.Expect( driver );
 
 			await commentArea._postComment( {
@@ -123,12 +119,9 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		} );
 
 		step( 'Unlike comment', async function () {
-			await driver.switchTo().defaultContent();
-
 			const commentUnLikeLink = By.xpath(
 				`//div[@class='comment-content']/p[.='${ comment }']/../p[@class='comment-likes comment-liked']/a[@class='comment-like-link']`
 			);
-			await driverHelper.scrollIntoView( driver, commentUnLikeLink, 'end' );
 			await driverHelper.clickWhenClickable( driver, commentUnLikeLink );
 
 			const commentUnLikedText = By.xpath(
@@ -153,26 +146,11 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 			await driverHelper.scrollIntoView( driver, likeButton );
 			await driverHelper.clickWhenClickable( driver, likeButton );
 
-			// Switch to new window opened
-			const handles = await driver.getAllWindowHandles();
-			await driver.switchTo().window( handles[ 1 ] );
-
 			const account = dataHelper.getAccountConfig( accountKey );
 			if ( ! account ) {
 				throw new Error( `Account key '${ accountKey }' not found in the configuration` );
 			}
-			const loginPage = await LoginPage.Expect( driver );
-
-			try {
-				await loginPage.login( account[ 0 ], account[ 1 ] );
-			} catch ( e ) {
-				// Ignore NoSuchWindowError - this type of login redirects and closes the popup after login.
-				// todo: refactor login flow to detect this kind of login
-				// todo: check we don't spam slack with failed loggin notifications
-			}
-
-			// Switch back to post window
-			await driver.switchTo().window( handles[ 0 ] );
+			await LoginPopup.Login( driver, account[ 0 ], account[ 1 ] );
 
 			// Frame switch required for xpath lookup to work
 			await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
