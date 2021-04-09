@@ -11,10 +11,9 @@ import * as driverManager from '../lib/driver-manager';
 import * as dataHelper from '../lib/data-helper';
 import * as driverHelper from '../lib/driver-helper';
 import LoginFlow from '../lib/flows/login-flow';
-import PostAreaComponent from '../lib/pages/frontend/post-area-component';
+import PostLikesComponent from '../lib/pages/frontend/post-likes-component';
 import CommentsAreaComponent from '../lib/pages/frontend/comments-area-component';
 import GutenbergEditorComponent from '../lib/gutenberg/gutenberg-editor-component';
-import AsyncBaseContainer from '../lib/async-base-container';
 
 const host = dataHelper.getJetpackHost();
 const screenSize = driverManager.currentScreenSize();
@@ -38,7 +37,7 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 
 	describe( 'Like posts and comments @parallel', function () {
 		beforeEach( 'Always start from the default frame', async function () {
-			await driver.switchTo().defaultContent();
+			await await driver.switchTo().defaultContent();
 		} );
 
 		step( 'Login, create a new post and view it', async function () {
@@ -56,45 +55,26 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 				const loginFlow = new LoginFlow( driver, accountKey );
 				await loginFlow.login();
 
-				const iFrame = By.css( 'iframe.post-likes-widget' );
 				postUrl = 'https://c3polikes.blog/2021/04/07/awful-orcs-drink-hastily/';
-				const postLikesArea = new AsyncBaseContainer( driver, iFrame, postUrl );
-				await postLikesArea._visitInit();
-
-				await PostAreaComponent.Expect( driver );
-
-				// Unlike post if currently liked
-				await driver.switchTo().defaultContent();
-				await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
-				await driverHelper.clickIfPresent( driver, By.css( '.liked.sd-button' ) );
+				const postLikes = await PostLikesComponent.Visit( driver, postUrl );
+				try {
+					await postLikes.clickUnlike();
+				} catch ( e ) {
+					console.log( e );
+				}
 			}
 		} );
 
 		step( 'Like post', async function () {
-			await PostAreaComponent.Expect( driver );
-
-			const likeButton = By.css( '.like.sd-button' );
-			const iFrame = By.css( 'iframe.post-likes-widget' );
-			await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
-			await driverHelper.scrollIntoView( driver, likeButton );
-			await driverHelper.clickWhenClickable( driver, likeButton );
-
-			const postLikedText = By.xpath( `//span[@class='wpl-count-text'][.='You like this.']` );
-			await driverHelper.waitTillPresentAndDisplayed( driver, postLikedText );
+			const postLikes = await PostLikesComponent.Expect( driver );
+			await postLikes.clickLike();
+			await postLikes.expectLiked();
 		} );
 
 		step( 'Unlike post', async function () {
-			const iFrame = By.css( 'iframe.post-likes-widget' );
-			await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
-
-			const likedButton = By.css( '.liked.sd-button' );
-			await driverHelper.scrollIntoView( driver, likedButton );
-			await driverHelper.clickWhenClickable( driver, likedButton );
-
-			const postLikedText = By.xpath(
-				`//span[@class='wpl-count-text'][.='Be the first to like this.']`
-			);
-			await driverHelper.waitTillPresentAndDisplayed( driver, postLikedText );
+			const postLikes = await PostLikesComponent.Expect( driver );
+			await postLikes.clickUnlike();
+			await postLikes.expectNotLiked();
 		} );
 
 		step( 'Post and like comment', async function () {
@@ -133,23 +113,13 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 		step( 'Like post as logged out user', async function () {
 			await driverManager.ensureNotLoggedIntoSite( driver, postUrl );
 
-			const iFrame = By.css( 'iframe.post-likes-widget' );
-			const postLikesArea = new AsyncBaseContainer( driver, iFrame, postUrl );
-			await postLikesArea._visitInit();
-
-			await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
-
-			const likeButton = By.css( '.like.sd-button' );
-			await driverHelper.scrollIntoView( driver, likeButton );
-			await driverHelper.clickWhenClickable( driver, likeButton );
+			const postLikes = await PostLikesComponent.Visit( driver, postUrl );
+			await postLikes.clickLike();
 
 			const loginFlow = new LoginFlow( driver, accountKey );
 			await loginFlow.loginUsingPopup();
 
-			// Frame switch required for xpath lookup to work
-			await driverHelper.waitUntilAbleToSwitchToFrame( driver, iFrame );
-			const postLikedText = By.xpath( `//span[@class='wpl-count-text'][.='You like this.']` );
-			await driverHelper.waitTillPresentAndDisplayed( driver, postLikedText );
+			await postLikes.expectLiked();
 		} );
 	} );
 } );
