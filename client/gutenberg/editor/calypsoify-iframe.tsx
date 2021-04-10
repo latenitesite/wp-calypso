@@ -140,10 +140,13 @@ enum EditorActions {
 	TrackPerformance = 'trackPerformance',
 }
 
-class CalypsoifyIframe extends Component<
-	Props & ConnectedProps & ProtectedFormProps & LocalizeProps & PerformanceTrackProps,
-	State
-> {
+type ComponentProps = Props &
+	ConnectedProps &
+	ProtectedFormProps &
+	LocalizeProps &
+	PerformanceTrackProps;
+
+class CalypsoifyIframe extends Component< ComponentProps, State > {
 	state: State = {
 		isMediaModalVisible: false,
 		isCheckoutModalVisible: false,
@@ -168,12 +171,9 @@ class CalypsoifyIframe extends Component<
 		// auth loop, we need to exit to wp-admin without the iFrame. Therefore,
 		// once we start loading the iFrame, we set the editor redirect timer to
 		// 25s. This timer is cleared when iFrame.onLoad is called.
-		const waitForIframeToInit = setInterval( () => {
-			if ( this.props.shouldLoadIframe ) {
-				clearInterval( waitForIframeToInit );
-				this.setEditorRedirectTimer( 25000 );
-			}
-		}, 100 );
+		if ( this.props.shouldLoadIframe && ! this.editorRedirectTimer ) {
+			this.setEditorRedirectTimer( 25000 );
+		}
 
 		// An earlier page with no access to the Calypso store (probably `/new`) has asked
 		// for the `lastNonEditorRoute` state to be cleared so that `getEditorCloseConfig()`
@@ -181,6 +181,13 @@ class CalypsoifyIframe extends Component<
 		if ( window.sessionStorage.getItem( 'a8c-clearLastNonEditorRoute' ) ) {
 			window.sessionStorage.removeItem( 'a8c-clearLastNonEditorRoute' );
 			this.props.clearLastNonEditorRoute();
+		}
+	}
+
+	componentDidUpdate( { shouldLoadIframe }: ComponentProps ) {
+		// If shouldLoadIframe changed from false to true, and the timer hasn't yet been set.
+		if ( ! this.editorRedirectTimer && ! shouldLoadIframe && this.props.shouldLoadIframe ) {
+			this.setEditorRedirectTimer( 2500 );
 		}
 	}
 
