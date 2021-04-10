@@ -192,6 +192,7 @@ class CalypsoifyIframe extends Component< ComponentProps, State > {
 	}
 
 	componentWillUnmount() {
+		this.editorRedirectTimer && clearTimeout( this.editorRedirectTimer );
 		window.removeEventListener( 'message', this.onMessage, false );
 	}
 
