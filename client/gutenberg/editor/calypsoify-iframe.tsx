@@ -197,8 +197,8 @@ class CalypsoifyIframe extends Component< ComponentProps, State > {
 
 	/**
 	 * The editor redirect timer will attempt to perform a redirect if the editor
-	 * has not loaded after a certain time. There are currently two stages to the.
-	 * timer The first stage waits up to 25 seconds for the iframe to call `onLoad`.
+	 * has not loaded after a certain time. There are currently two stages to the
+	 * timer. The first stage waits up to 25 seconds for the iframe to call `onLoad`.
 	 * We then wait a further 1s for the iframe-bridge-server to respond that the
 	 * editor itself is ready to go. We only consider Gutenframe to be ready after
 	 * the iframe-bridge-server has responded.
