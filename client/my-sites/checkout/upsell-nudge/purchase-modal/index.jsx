@@ -80,6 +80,7 @@ export default function PurchaseModalWrapper( props ) {
 			siteSlug: selectedSite?.slug ?? '',
 			siteId: selectedSite?.ID ?? '',
 			stripeConfiguration,
+			contactDetails: undefined,
 		} ),
 		[
 			includeDomainDetails,
