@@ -2,18 +2,17 @@
  * External dependencies
  */
 import config from 'config';
-import { By } from 'selenium-webdriver';
 
 /**
  * Internal dependencies
  */
 import * as driverManager from '../lib/driver-manager';
 import * as dataHelper from '../lib/data-helper';
-import * as driverHelper from '../lib/driver-helper';
 import LoginFlow from '../lib/flows/login-flow';
 import PostLikesComponent from '../lib/pages/frontend/post-likes-component';
-import CommentsAreaComponent from '../lib/pages/frontend/comments-area-component';
 import GutenbergEditorComponent from '../lib/gutenberg/gutenberg-editor-component';
+import CommentLikesComponent from '../lib/pages/frontend/comment-likes-component';
+import { step } from 'mocha-steps';
 
 const host = dataHelper.getJetpackHost();
 const screenSize = driverManager.currentScreenSize();
@@ -77,37 +76,16 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 			await postLikes.expectNotLiked();
 		} );
 
-		step( 'Post and like comment', async function () {
-			const commentArea = await CommentsAreaComponent.Expect( driver );
-
-			await commentArea.reply( {
-				comment: comment,
-				name: 'e2eTestName',
-				email: 'e2eTestName@test.com',
-			} );
-
-			const commentLikeLink = By.xpath(
-				`//div[@class='comment-content']/p[.='${ comment }']/../p/a[@class='comment-like-link']`
-			);
-			await driverHelper.scrollIntoView( driver, commentLikeLink, 'end' );
-			await driverHelper.clickWhenClickable( driver, commentLikeLink );
-
-			const commentLikedText = By.xpath(
-				`//div[@class='comment-content']/p[.='${ comment }']/../p/span[starts-with(text(),'Liked by')]`
-			);
-			await driverHelper.waitTillPresentAndDisplayed( driver, commentLikedText );
+		step( 'Like comment', async function () {
+			const commentLikes = await CommentLikesComponent.PostComment( driver, comment );
+			await commentLikes.likeComment();
+			await commentLikes.expectLiked();
 		} );
 
 		step( 'Unlike comment', async function () {
-			const commentUnLikeLink = By.xpath(
-				`//div[@class='comment-content']/p[.='${ comment }']/../p[@class='comment-likes comment-liked']/a[@class='comment-like-link']`
-			);
-			await driverHelper.clickWhenClickable( driver, commentUnLikeLink );
-
-			const commentUnLikedText = By.xpath(
-				`//div[@class='comment-content']/p[.='${ comment }']/../p/span[starts-with(text(),'Like')]`
-			);
-			await driverHelper.waitTillPresentAndDisplayed( driver, commentUnLikedText );
+			const commentLikes = await CommentLikesComponent.Expect( driver, comment );
+			await commentLikes.unlikeComment();
+			await commentLikes.expectNotLiked();
 		} );
 
 		step( 'Like post as logged out user', async function () {
