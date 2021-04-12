@@ -35,33 +35,14 @@ describe( `[${ host }] Likes: (${ screenSize })`, function () {
 	} );
 
 	describe( 'Like posts and comments @parallel', function () {
-		beforeEach( 'Always start from the default frame', async function () {
-			await await driver.switchTo().defaultContent();
-		} );
-
 		step( 'Login, create a new post and view it', async function () {
-			if ( process.env.NODE_CONFIG_ENV !== 'decrypted' ) {
-				const loginFlow = new LoginFlow( driver, accountKey );
-				await loginFlow.loginAndStartNewPost( null, true );
+			const loginFlow = new LoginFlow( driver, accountKey );
+			await loginFlow.loginAndStartNewPost( null, true );
 
-				const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
-				await gEditorComponent.enterTitle( blogPostTitle );
-				await gEditorComponent.enterText( blogPostQuote );
-				postUrl = await gEditorComponent.publish( { visit: true } );
-			} else {
-				// tofix: remove this section
-				accountKey = 'louisTestUser';
-				const loginFlow = new LoginFlow( driver, accountKey );
-				await loginFlow.login();
-
-				postUrl = 'https://c3polikes.blog/2021/04/07/awful-orcs-drink-hastily/';
-				const postLikes = await PostLikesComponent.Visit( driver, postUrl );
-				try {
-					await postLikes.clickUnlike();
-				} catch ( e ) {
-					console.log( e );
-				}
-			}
+			const gEditorComponent = await GutenbergEditorComponent.Expect( driver );
+			await gEditorComponent.enterTitle( blogPostTitle );
+			await gEditorComponent.enterText( blogPostQuote );
+			postUrl = await gEditorComponent.publish( { visit: true } );
 		} );
 
 		step( 'Like post', async function () {

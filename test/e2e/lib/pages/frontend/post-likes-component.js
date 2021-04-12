@@ -14,7 +14,12 @@ export default class PostLikesComponent extends AsyncBaseContainer {
 		super( driver, By.css( 'iframe.post-likes-widget' ), url );
 	}
 
+	async _preInit() {
+		await this.driver.switchTo().defaultContent();
+	}
+
 	async clickLike() {
+		await this.driver.switchTo().defaultContent();
 		await driverHelper.waitUntilAbleToSwitchToFrame( this.driver, this.expectedElementSelector );
 		const likeButton = By.css( '.like.sd-button' );
 		await driverHelper.scrollIntoView( this.driver, likeButton );
@@ -23,6 +28,7 @@ export default class PostLikesComponent extends AsyncBaseContainer {
 	}
 
 	async expectLiked() {
+		await this.driver.switchTo().defaultContent();
 		await driverHelper.waitUntilAbleToSwitchToFrame( this.driver, this.expectedElementSelector );
 		await driverHelper.waitTillPresentAndDisplayed(
 			this.driver,
@@ -32,6 +38,7 @@ export default class PostLikesComponent extends AsyncBaseContainer {
 	}
 
 	async clickUnlike() {
+		await this.driver.switchTo().defaultContent();
 		await driverHelper.waitUntilAbleToSwitchToFrame( this.driver, this.expectedElementSelector );
 		const likedButton = By.css( '.liked.sd-button' );
 		await driverHelper.scrollIntoView( this.driver, likedButton );
@@ -40,6 +47,7 @@ export default class PostLikesComponent extends AsyncBaseContainer {
 	}
 
 	async expectNotLiked() {
+		await this.driver.switchTo().defaultContent();
 		await driverHelper.waitUntilAbleToSwitchToFrame( this.driver, this.expectedElementSelector );
 		await driverHelper.waitTillPresentAndDisplayed(
 			this.driver,
